@@ -83,7 +83,7 @@ annotations = alt.Chart(annotations_df).mark_text(
     align='left',
     baseline='middle',
     dx=8,
-    fontSize=12,
+    fontSize=14,
     color='black'
 ).encode(
     x='log_MIC:Q',
@@ -95,7 +95,12 @@ chart = (bars + annotations).properties(
     width=750,
     height=550,
     title="Resistance Profile of Bacteria Across Three Antibiotics"
+).configure_view(
+    stroke=None  # Removes border around plot area
+).configure(
+    background='#f0f4f9'  # Light blue-gray background
 )
+
 
 # --- Display in Streamlit ---
 st.altair_chart(chart, use_container_width=True)
