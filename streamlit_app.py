@@ -92,14 +92,18 @@ annotations = alt.Chart(annotations_df).mark_text(
 )
 
 chart = (bars + annotations).properties(
-    width=750,
-    height=550,
+    width=950,  # Wider chart
+    height=600,
     title="Resistance Profile of Bacteria Across Three Antibiotics"
 ).configure_view(
-    stroke=None  # Removes border around plot area
+    stroke=None
+).configure_axis(
+    labelFontSize=12,
+    labelLimit=300  # Allow full labels
 ).configure(
-    background='#f0f4f9'  # Light blue-gray background
+    background='#f0f4f9'
 )
+
 
 
 # --- Display in Streamlit ---
