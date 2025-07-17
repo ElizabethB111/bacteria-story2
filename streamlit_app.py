@@ -83,7 +83,7 @@ annotations = alt.Chart(annotations_df).mark_text(
     align='left',
     baseline='middle',
     dx=8,
-    fontSize=14,
+    fontSize=16,
     color='black'
 ).encode(
     x='log_MIC:Q',
