@@ -46,10 +46,10 @@ df_melt["Bacteria_Label"] = df_melt.apply(
 
 # --- Streamlit content ---
 st.set_page_config(layout="wide")
-st.title("🔬 Multidrug-Resistant Bacteria: When No Antibiotic Works")
+st.title("Multidrug-Resistant Bacteria: When No Antibiotic Works")
 
 st.markdown("""
-### 🧪 Antibiotic Resistance is a Global Health Threat
+### Antibiotic Resistance is a Global Health Threat
 This chart shows the **Minimum Inhibitory Concentration (MIC)** (the lowest concentration of an antibiotic that stops bacterial growth) for three common antibiotics.
 
 Bacteria marked with ⚠️ are **multidrug-resistant (MDR)**: resistant to **all three antibiotics**. These bacteria may be untreatable with commonly-available medications.
@@ -121,7 +121,7 @@ chart = (bars + annotations).properties(
 st.altair_chart(chart, use_container_width=True)
 
 st.markdown("""
-### 🔎 Key Takeaways
+### Final Notes
 - **Aerobacter aerogenes**, **Klebsiella pneumoniae**, and **Pseudomonas aeruginosa** show **high MICs** for all three antibiotics.
 - These bacteria possess severe antimicrobial resistance and therefore require different treatment strategies.
 """)
