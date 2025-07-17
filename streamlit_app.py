@@ -53,7 +53,15 @@ A log scale is used here to visualize MIC values: higher values mean **stronger 
 base = alt.Chart(df_melt).encode(
     x=alt.X("log_MIC:Q", title="log₁₀(MIC)", scale=alt.Scale(zero=False)),
     y=alt.Y("Bacteria_Label:N", sort="-x", title="Bacterial Species"),
-    color=alt.Color("Antibiotic:N", title="Antibiotic"),
+    color=alt.Color(
+    "Antibiotic:N",
+    title="Antibiotic",
+    scale=alt.Scale(
+        domain=["Penicillin", "Streptomycin", "Neomycin"],
+        range=["#1f77b4", "#ff7f0e", "#2ca02c"]  # blue, orange, green
+    )
+),
+
     opacity=alt.condition(
         alt.datum.Resistant == "Multidrug-Resistant",
         alt.value(1),
