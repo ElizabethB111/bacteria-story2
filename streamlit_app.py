@@ -96,10 +96,10 @@ annotations_df = pd.DataFrame({
 })
 
 annotations = alt.Chart(annotations_df).mark_text(
-    align='left',
+    align='middle',
     baseline='middle',
     dx=8,
-    fontSize=12,
+    fontSize=16,
     color='black'
 ).encode(
     x='log_MIC:Q',
