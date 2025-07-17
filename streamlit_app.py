@@ -32,24 +32,70 @@ df_melt["log_MIC"] = np.log10(df_melt["MIC"])
 # Mark resistant bacteria
 resistant_set = ["Aerobacter aerogenes", "Klebsiella pneumoniae", "Pseudomonas aeruginosa"]
 df_melt["Resistant"] = df_melt["Bacteria"].apply(lambda x: "Multidrug-Resistant" if x in resistant_set else "Other")
+df_melt["Bacteria_Label"] = df_melt.apply(
+    lambda row: "⚠️ " + row["Bacteria"] if row["Resistant"] == "Multidrug-Resistant" else row["Bacteria"], axis=1
+)
 
-# Chart
+# --- Streamlit content ---
+st.set_page_config(layout="wide")
 st.title("🔬 Multidrug-Resistant Bacteria: When No Antibiotic Works")
 
-chart = alt.Chart(df_melt).mark_bar().encode(
-    x=alt.X("log_MIC:Q", title="log₁₀(MIC)"),
-    y=alt.Y("Bacteria:N", sort="-x", title="Bacterial Species"),
-    color=alt.Color("Antibiotic:N"),
-    tooltip=["Bacteria", "Antibiotic", "MIC"],
+st.markdown("""
+### 🧪 Understanding Antibiotic Resistance
+Antibiotic resistance is a growing global health threat. This chart shows the **Minimum Inhibitory Concentration (MIC)**—the lowest concentration of an antibiotic that stops bacterial growth—for three common antibiotics.
+
+Species marked with ⚠️ are **multidrug-resistant (MDR)**: resistant to **all three antibiotics**. These bacteria may be untreatable with conventional medications.
+
+We use a log scale to visualize MIC values, where higher values mean **stronger resistance**.
+""")
+
+# --- Base Chart ---
+base = alt.Chart(df_melt).encode(
+    x=alt.X("log_MIC:Q", title="log₁₀(MIC)", scale=alt.Scale(zero=False)),
+    y=alt.Y("Bacteria_Label:N", sort="-x", title="Bacterial Species"),
+    color=alt.Color("Antibiotic:N", title="Antibiotic"),
     opacity=alt.condition(
         alt.datum.Resistant == "Multidrug-Resistant",
         alt.value(1),
         alt.value(0.3)
-    )
-).properties(
-    width=700,
-    height=500,
+    ),
+    tooltip=["Bacteria", "Antibiotic", "MIC"]
+)
+
+bars = base.mark_bar()
+
+# --- Annotations for MDR cases ---
+annotations_df = pd.DataFrame({
+    "log_MIC": [np.log10(870), np.log10(850), np.log10(850)],
+    "Bacteria_Label": ["⚠️ Aerobacter aerogenes", "⚠️ Klebsiella pneumoniae", "⚠️ Pseudomonas aeruginosa"],
+    "Note": ["Very high resistance", "Near max resistance", "Resistant to all"]
+})
+
+annotations = alt.Chart(annotations_df).mark_text(
+    align='left',
+    baseline='middle',
+    dx=8,
+    fontSize=12,
+    color='red'
+).encode(
+    x='log_MIC:Q',
+    y='Bacteria_Label:N',
+    text='Note:N'
+)
+
+chart = (bars + annotations).properties(
+    width=750,
+    height=550,
     title="Resistance Profile of Bacteria Across Three Antibiotics"
 )
 
-st.altair_chart(chart)
+# --- Display in Streamlit ---
+st.altair_chart(chart, use_container_width=True)
+
+st.markdown("""
+### 🔎 Key Takeaways
+- **Aerobacter aerogenes**, **Klebsiella pneumoniae**, and **Pseudomonas aeruginosa** all show **high MICs** across all three antibiotics.
+- These species may require alternative treatment strategies, indicating the severity of antimicrobial resistance.
+- Visualizing on a **logarithmic scale** helps make extreme resistance patterns visible.
+""")
+
