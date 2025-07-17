@@ -96,10 +96,10 @@ annotations_df = pd.DataFrame({
 })
 
 annotations = alt.Chart(annotations_df).mark_text(
-    align='middle',
+    align='left',
     baseline='middle',
     dx=8,
-    fontSize=16,
+    fontSize=12,
     color='black'
 ).encode(
     x='log_MIC:Q',
@@ -125,5 +125,6 @@ st.markdown("""
 - **Aerobacter aerogenes**, **Klebsiella pneumoniae**, and **Pseudomonas aeruginosa** show **high MICs** for all three antibiotics.
 - These bacteria possess severe antimicrobial resistance and therefore require different treatment strategies.
 """)
+
 
 
