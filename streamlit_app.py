@@ -1,151 +1,95 @@
-import streamlit as st
+import altair as alt
 import pandas as pd
-import math
-from pathlib import Path
+import numpy as np
+import streamlit as st
 
-# Set the title and favicon that appear in the Browser's tab bar.
-st.set_page_config(
-    page_title='GDP dashboard',
-    page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
-)
-
-# -----------------------------------------------------------------------------
-# Declare some useful functions.
-
-@st.cache_data
-def get_gdp_data():
-    """Grab GDP data from a CSV file.
-
-    This uses caching to avoid having to read the file every time. If we were
-    reading from an HTTP endpoint instead of a file, it's a good idea to set
-    a maximum age to the cache with the TTL argument: @st.cache_data(ttl='1d')
-    """
-
-    # Instead of a CSV on disk, you could read from an HTTP endpoint here too.
-    DATA_FILENAME = Path(__file__).parent/'data/gdp_data.csv'
-    raw_gdp_df = pd.read_csv(DATA_FILENAME)
-
-    MIN_YEAR = 1960
-    MAX_YEAR = 2022
-
-    # The data above has columns like:
-    # - Country Name
-    # - Country Code
-    # - [Stuff I don't care about]
-    # - GDP for 1960
-    # - GDP for 1961
-    # - GDP for 1962
-    # - ...
-    # - GDP for 2022
-    #
-    # ...but I want this instead:
-    # - Country Name
-    # - Country Code
-    # - Year
-    # - GDP
-    #
-    # So let's pivot all those year-columns into two: Year and GDP
-    gdp_df = raw_gdp_df.melt(
-        ['Country Code'],
-        [str(x) for x in range(MIN_YEAR, MAX_YEAR + 1)],
-        'Year',
-        'GDP',
-    )
-
-    # Convert years from string to integers
-    gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
-
-    return gdp_df
-
-gdp_df = get_gdp_data()
-
-# -----------------------------------------------------------------------------
-# Draw the actual page
-
-# Set the title that appears at the top of the page.
-'''
-# :earth_americas: GDP dashboard
-
-Browse GDP data from the [World Bank Open Data](https://data.worldbank.org/) website. As you'll
-notice, the data only goes to 2022 right now, and datapoints for certain years are often missing.
-But it's otherwise a great (and did I mention _free_?) source of data.
-'''
-
-# Add some spacing
-''
-''
-
-min_value = gdp_df['Year'].min()
-max_value = gdp_df['Year'].max()
-
-from_year, to_year = st.slider(
-    'Which years are you interested in?',
-    min_value=min_value,
-    max_value=max_value,
-    value=[min_value, max_value])
-
-countries = gdp_df['Country Code'].unique()
-
-if not len(countries):
-    st.warning("Select at least one country")
-
-selected_countries = st.multiselect(
-    'Which countries would you like to view?',
-    countries,
-    ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
-
-''
-''
-''
-
-# Filter the data
-filtered_gdp_df = gdp_df[
-    (gdp_df['Country Code'].isin(selected_countries))
-    & (gdp_df['Year'] <= to_year)
-    & (from_year <= gdp_df['Year'])
+# --- Data ---
+data = [
+    {"Bacteria": "Aerobacter aerogenes", "Penicillin": 870, "Streptomycin": 1, "Neomycin": 1.6},
+    {"Bacteria": "Bacillus anthracis", "Penicillin": 0.001, "Streptomycin": 0.01, "Neomycin": 0.007},
+    {"Bacteria": "Brucella abortus", "Penicillin": 1, "Streptomycin": 2, "Neomycin": 0.02},
+    {"Bacteria": "Diplococcus pneumoniae", "Penicillin": 0.005, "Streptomycin": 11, "Neomycin": 10},
+    {"Bacteria": "Escherichia coli", "Penicillin": 100, "Streptomycin": 0.4, "Neomycin": 0.1},
+    {"Bacteria": "Klebsiella pneumoniae", "Penicillin": 850, "Streptomycin": 1.2, "Neomycin": 1},
+    {"Bacteria": "Mycobacterium tuberculosis", "Penicillin": 800, "Streptomycin": 5, "Neomycin": 2},
+    {"Bacteria": "Proteus vulgaris", "Penicillin": 3, "Streptomycin": 0.1, "Neomycin": 0.1},
+    {"Bacteria": "Pseudomonas aeruginosa", "Penicillin": 850, "Streptomycin": 2, "Neomycin": 0.4},
+    {"Bacteria": "Salmonella (Eberthella) typhosa", "Penicillin": 1, "Streptomycin": 0.4, "Neomycin": 0.008},
+    {"Bacteria": "Salmonella schottmuelleri", "Penicillin": 10, "Streptomycin": 0.8, "Neomycin": 0.09},
+    {"Bacteria": "Staphylococcus albus", "Penicillin": 0.007, "Streptomycin": 0.1, "Neomycin": 0.001},
+    {"Bacteria": "Staphylococcus aureus", "Penicillin": 0.03, "Streptomycin": 0.03, "Neomycin": 0.001},
+    {"Bacteria": "Streptococcus fecalis", "Penicillin": 1, "Streptomycin": 1, "Neomycin": 0.1},
+    {"Bacteria": "Streptococcus hemolyticus", "Penicillin": 0.001, "Streptomycin": 14, "Neomycin": 10},
+    {"Bacteria": "Streptococcus viridans", "Penicillin": 0.005, "Streptomycin": 10, "Neomycin": 40}
 ]
 
-st.header('GDP over time', divider='gray')
+df = pd.DataFrame(data)
 
-''
+# Melt to long format
+df_melt = df.melt(id_vars="Bacteria", var_name="Antibiotic", value_name="MIC")
+df_melt["log_MIC"] = np.log10(df_melt["MIC"])
 
-st.line_chart(
-    filtered_gdp_df,
-    x='Year',
-    y='GDP',
-    color='Country Code',
+# Label multidrug-resistant bacteria
+resistant_bacteria = ["Aerobacter aerogenes", "Klebsiella pneumoniae", "Pseudomonas aeruginosa"]
+df_melt["Resistant"] = df_melt["Bacteria"].apply(lambda x: "Multidrug-Resistant" if x in resistant_bacteria else "Other")
+
+# Tooltip notes
+df_melt["Note"] = df_melt["Resistant"].apply(lambda r: "⚠️ Likely ineffective" if r == "Multidrug-Resistant" else "")
+
+# Base bar chart
+bar = alt.Chart(df_melt).mark_bar().encode(
+    x=alt.X("log_MIC:Q", title="log₁₀(MIC)"),
+    y=alt.Y("Bacteria:N", sort="-x"),
+    color=alt.Color("Antibiotic:N"),
+    opacity=alt.condition(
+        alt.datum.Resistant == "Multidrug-Resistant",
+        alt.value(1),
+        alt.value(0.3)
+    ),
+    tooltip=["Bacteria", "Antibiotic", "MIC", "Resistant", "Note"]
 )
 
-''
-''
+# Highlight background for resistant bacteria
+highlight_bg = alt.Chart(df_melt[df_melt["Resistant"] == "Multidrug-Resistant"]).mark_rect(
+    opacity=0.08,
+    color='crimson'
+).encode(
+    y=alt.Y('Bacteria:N', sort='-x')
+)
 
+# Inline annotation text
+highlight_text = alt.Chart(df_melt[df_melt["Resistant"] == "Multidrug-Resistant"]).mark_text(
+    align='left',
+    dx=3,
+    color='crimson',
+    fontWeight='bold',
+    fontSize=11
+).encode(
+    x="log_MIC:Q",
+    y="Bacteria:N",
+    text=alt.value("High Resistance")
+)
 
-first_year = gdp_df[gdp_df['Year'] == from_year]
-last_year = gdp_df[gdp_df['Year'] == to_year]
+# Reference rule (log MIC = 1 → MIC = 10)
+threshold_line = alt.Chart(pd.DataFrame({'x': [np.log10(10)]})).mark_rule(
+    strokeDash=[4, 3],
+    color='black'
+).encode(
+    x='x:Q'
+)
 
-st.header(f'GDP in {to_year}', divider='gray')
+# Combine all layers
+final_chart = alt.layer(
+    highlight_bg,
+    bar,
+    threshold_line,
+    highlight_text
+).properties(
+    width=750,
+    height=550,
+    title="🔬 Multidrug Resistance Across Three Antibiotics"
+)
 
-''
-
-cols = st.columns(4)
-
-for i, country in enumerate(selected_countries):
-    col = cols[i % len(cols)]
-
-    with col:
-        first_gdp = first_year[first_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-        last_gdp = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-
-        if math.isnan(first_gdp):
-            growth = 'n/a'
-            delta_color = 'off'
-        else:
-            growth = f'{last_gdp / first_gdp:,.2f}x'
-            delta_color = 'normal'
-
-        st.metric(
-            label=f'{country} GDP',
-            value=f'{last_gdp:,.0f}B',
-            delta=growth,
-            delta_color=delta_color
-        )
+# Streamlit title + chart
+st.title("🧬 The Resistant Few: When No Antibiotic Works")
+st.altair_chart(final_chart, use_container_width=True)
