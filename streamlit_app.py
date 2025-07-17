@@ -38,7 +38,7 @@ df_melt["Bacteria_Label"] = df_melt.apply(
 
 # --- Streamlit content ---
 st.set_page_config(layout="wide")
-st.title("🔬 Multidrug-Resistant Bacteria: When No Antibiotic Works")
+st.title("Multidrug-Resistant Bacteria: When No Antibiotic Works")
 
 st.markdown("""
 ### 🧪 Antibiotic Resistance is a Global Health Threat
@@ -93,9 +93,8 @@ chart = (bars + annotations).properties(
 st.altair_chart(chart, use_container_width=True)
 
 st.markdown("""
-### 🔎 Key Takeaways
+### Note:
 - **Aerobacter aerogenes**, **Klebsiella pneumoniae**, and **Pseudomonas aeruginosa** show **high MICs** for all three antibiotics.
 - These bacteria possess severe antimicrobial resistance and therefore need different treatments.
-- The **logarithmic scale** allows resistance patterns to be better visualized.
 """)
 
