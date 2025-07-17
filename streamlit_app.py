@@ -41,12 +41,12 @@ st.set_page_config(layout="wide")
 st.title("🔬 Multidrug-Resistant Bacteria: When No Antibiotic Works")
 
 st.markdown("""
-### 🧪 Understanding Antibiotic Resistance
-Antibiotic resistance is a growing global health threat. This chart shows the **Minimum Inhibitory Concentration (MIC)**—the lowest concentration of an antibiotic that stops bacterial growth—for three common antibiotics.
+### 🧪 Antibiotic Resistance is a Global Health Threat
+This chart shows the **Minimum Inhibitory Concentration (MIC)** (the lowest concentration of an antibiotic that stops bacterial growth) for three common antibiotics.
 
-Species marked with ⚠️ are **multidrug-resistant (MDR)**: resistant to **all three antibiotics**. These bacteria may be untreatable with conventional medications.
+Bacteria with ⚠️ are **multidrug-resistant (MDR)**: resistant to **all three antibiotics**. These bacteria may be untreatable with commonly-available medications.
 
-We use a log scale to visualize MIC values, where higher values mean **stronger resistance**.
+A log scale is used here to visualize MIC values: higher values mean **stronger resistance**.
 """)
 
 # --- Base Chart ---
@@ -76,7 +76,7 @@ annotations = alt.Chart(annotations_df).mark_text(
     baseline='middle',
     dx=8,
     fontSize=12,
-    color='red'
+    color='black'
 ).encode(
     x='log_MIC:Q',
     y='Bacteria_Label:N',
@@ -94,8 +94,8 @@ st.altair_chart(chart, use_container_width=True)
 
 st.markdown("""
 ### 🔎 Key Takeaways
-- **Aerobacter aerogenes**, **Klebsiella pneumoniae**, and **Pseudomonas aeruginosa** all show **high MICs** across all three antibiotics.
-- These species may require alternative treatment strategies, indicating the severity of antimicrobial resistance.
-- Visualizing on a **logarithmic scale** helps make extreme resistance patterns visible.
+- **Aerobacter aerogenes**, **Klebsiella pneumoniae**, and **Pseudomonas aeruginosa** show **high MICs** for all three antibiotics.
+- These bacteria possess severe antimicrobial resistance and therefore need different treatments.
+- The **logarithmic scale** allows resistance patterns to be better visualized.
 """)
 
